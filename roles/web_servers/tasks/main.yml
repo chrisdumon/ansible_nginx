@@ -1,0 +1,49 @@
+- name: install nginx prerequisites (CentOS)
+  tags: nginx,centos,yum
+  dnf:
+    name: yum-utils
+    state: latest
+  when: ansible_distribution == "CentOS"
+
+- name: install nginx prerequisites (Ubuntu)
+  tags: nginx,ubuntu
+  apt:
+    name: 
+      - curl
+      - gnupg2
+      - ca-certificates
+      - lsb-release
+      - debian-archive-keyring
+    state: latest
+  when: ansible_distribution == "Ubuntu"
+
+- name: setup yum repository (CentOS)
+  tags: nginx,yum,centos
+  copy:
+    src: nginx.repo
+    dest: /etc/yum.repos.d/nginx.repo
+    owner: root
+    group: root
+    mode: 0644
+  when: ansible_distribution == "CentOS"
+
+- name: Install nginx (CentOS)
+  tags: nginx,yum,centos
+  package:
+    name:
+      - "{{ nginx_package }}"
+    state: latest
+    
+- name: Add base index page (CentOS)
+  copy:
+    src: index.html
+    dest: /usr/share/nginx/html/index.html
+    owner: root
+    group: root
+    mode: 0644
+  when: ansible_distribution == "CentOS"
+
+- name: Start nginx service
+  service:
+    name: "{{ nginx_service }}"
+    state: started
